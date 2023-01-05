@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:gravity="center"
+    android:padding="10dp"
+    android:orientation="vertical">
+
+    <com.stripe.android.view.CardMultilineWidget
+        android:id="@+id/card_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/holder_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Card holder name"
+        android:layout_gravity="start"
+        android:layout_marginTop="24dp"/>
+
+    <Button
+        android:id="@+id/pay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Pay"/>
+
+</LinearLayout>
