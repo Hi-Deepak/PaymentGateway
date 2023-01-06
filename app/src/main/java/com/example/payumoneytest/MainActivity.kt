@@ -1,11 +1,9 @@
 package com.example.payumoneytest
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.android.volley.Request.Method
-import com.android.volley.RequestQueue
+import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.example.payumoneytest.databinding.ActivityMainBinding
@@ -16,9 +14,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var payment_id : String
     lateinit var token : String
+    lateinit var encrypted_cvv: String
 
-    lateinit var card_number :String
-    lateinit var holder_name : String
 
     lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,21 +23,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val jsonObject = JSONObject()
-        jsonObject.put("amount",100)
-        jsonObject.put("currency","INR")
-
 
         binding.pay.setOnClickListener {
-
-            card_number = binding.cardInput.cardNumberEditText.text.toString().filter { !it.isWhitespace() }
-            holder_name = binding.holderName.text.toString()
-
-            if(binding.cardInput.validateAllFields()){
                 createToken()
-            }else{
-                Toast.makeText(this," enter valid card details ",Toast.LENGTH_SHORT).show()
-            }
+
         }
 
     }
@@ -51,13 +37,16 @@ class MainActivity : AppCompatActivity() {
 
         val jsonObject = JSONObject()
         jsonObject.put("token_type","credit_card")
-        jsonObject.put("card_number",card_number)
-        jsonObject.put("holder_name",holder_name)
+        jsonObject.put("credit_card_cvv","274")
+        jsonObject.put("card_number","4047457539765494")
+        jsonObject.put("expiration_date","02/26")
+        jsonObject.put("holder_name","OM PRAKASH")
 
         val jsonObjectRequest = object :JsonObjectRequest(Method.POST,"https://api.paymentsos.com/tokens",jsonObject
             ,{
                 Toast.makeText(this," success ",Toast.LENGTH_SHORT).show()
                 token = it.getString("token")
+                encrypted_cvv = it.getString("encrypted_cvv")
                 createPayment()
         }
         ,{
@@ -80,16 +69,28 @@ class MainActivity : AppCompatActivity() {
     fun createPayment(){
         val requestQueue = Volley.newRequestQueue(this)
 
+        val billing_address = JSONObject()
+        billing_address.put("phone","8890024434")
+        billing_address.put("country","IND")
+        billing_address.put("state","Rajasthan")
+        billing_address.put("city","Jaipur")
+        billing_address.put("email","piyush.naranje@ubuy.com")
+        billing_address.put("first_name","kirti")
+        billing_address.put("last_name","jain")
+        billing_address.put("zip_code","302019")
+
+
         val payment = JSONObject()
-        payment.put("amount",100)
+        payment.put("amount",200)
         payment.put("currency","INR")
+        payment.put("billing_address",billing_address)
 
         val jsonObjectRequest = object : JsonObjectRequest(Method.POST
             , "https://api.paymentsos.com/payments"
             , payment
             , {
                 payment_id = it.getString("id")
-                Toast.makeText(this," success ",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this," success",Toast.LENGTH_SHORT).show()
                 getCharges()
             }
             , {
@@ -103,7 +104,6 @@ class MainActivity : AppCompatActivity() {
                 header["Content-Type"]="application/json"
                 header["api-version"] = "1.3.0"
                 header["x-payments-os-env"] = "live"
-                header["idempotency_key"] = "12345"
                 return header
             }
 
@@ -116,11 +116,12 @@ class MainActivity : AppCompatActivity() {
     fun getCharges(){
         val paymentMethod = JSONObject()
         paymentMethod.put("type","tokenized")
-        //paymentMethod.put("source_type","payment_page")
-        paymentMethod.put("token","$token")
+        paymentMethod.put("token", token)
+        paymentMethod.put("encrypted_cvv",encrypted_cvv)
 
         val jsonObject = JSONObject()
         jsonObject.put("payment_method",paymentMethod)
+        jsonObject.put("merchant_site_url","https://www.ubuy.co.in/")
 
         val requestQueue = Volley.newRequestQueue(this)
 
@@ -129,6 +130,7 @@ class MainActivity : AppCompatActivity() {
             ,jsonObject
             ,{
                 Toast.makeText(this," success ",Toast.LENGTH_SHORT).show()
+                Log.d( "getCharges: ", it.toString() )
             }
             ,{
                 Toast.makeText(this," error ",Toast.LENGTH_SHORT).show()
@@ -140,7 +142,6 @@ class MainActivity : AppCompatActivity() {
                 header["Content-Type"]="application/json"
                 header["api-version"] = "1.3.0"
                 header["x-payments-os-env"] = "live"
-                header["idempotency_key"] = "12345"
                 return header
             }
         }
