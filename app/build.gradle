@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.example.payumoneytest'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.payumoneytest"
         minSdk 26
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -30,6 +30,15 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        def compose_version = '1.2.0-rc01'
+        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerVersion '1.6.21'
+    }
 
     viewBinding{
         enabled = true
@@ -37,6 +46,8 @@ android {
 }
 
 dependencies {
+
+    def compose_version = '1.2.0-rc01'
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.5.1'
@@ -52,4 +63,15 @@ dependencies {
 
     implementation 'com.stripe:stripe-android:19.2.2'
     implementation 'com.stripe:stripe-java:22.0.0'
+
+    //CheckOut
+    implementation 'com.github.checkout:frames-android:4.0.2'
+
+    /**
+     * Compose SDKs
+     */
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 }
